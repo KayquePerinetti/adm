@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tabela de Campeonato</title>
+  <title>Campeonato</title>
   <style>
     html {
     display: flex;
@@ -17,9 +17,13 @@
       border-collapse: collapse;
     }
     th, td {
-      padding: 10px;
+      padding: 7px 0px;
       text-align: center;
       border: 1px solid #ddd;
+    }
+    button.apagar {
+    cursor: pointer;
+    padding: 2px;
     }
     h1 {
     display: inline;
@@ -46,7 +50,7 @@
 </head>
 <body>
 <div>
-  <h1>Tabela de Campeonato</h1>
+  <h1>Campeonato</h1>
   <input type="text" id="teamName" placeholder="Nome do time" required>
   <button id="addTeamBtn">Adicionar Time</button>
   <button id="downloadPDFBtn">Baixar PDF</button>
@@ -105,7 +109,7 @@
           <td contenteditable="true" onblur="updateRecord(${index}, 'losses', this.innerText)" oninput="validateNumber(this)">${team.losses}</td>
           <td>${team.points}</td>
           <td>
-            <button onclick="removeTeam(${index})">Remover</button>
+            <button onclick="removeTeam(${index})" class="apagar">Apagar</button>
           </td>
         `;
       });
