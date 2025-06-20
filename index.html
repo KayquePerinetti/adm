@@ -7,11 +7,10 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
       background-color: #f4f4f9;
     }
     table {
-      width: 100%;
+      width: 80%;
       border-collapse: collapse;
       margin-top: 20px;
     }
@@ -32,10 +31,14 @@
     #addTeamBtn {
       margin-bottom: 20px;
     }
+    div{
+    display: grid;
+    justify-content: center;
+    }
   </style>
 </head>
 <body>
-
+<div>
   <h1>Tabela de Campeonato</h1>
   <input type="text" id="teamName" placeholder="Nome do time" required>
   <button id="addTeamBtn">Adicionar Time</button>
@@ -57,7 +60,7 @@
       <!-- Linhas de times serão adicionadas aqui -->
     </tbody>
   </table>
-
+</div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const { jsPDF } = window.jspdf;
