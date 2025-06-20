@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabela de Campeonato</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    button {
+      padding: 5px 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    #addTeamBtn {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tabela de Campeonato</h1>
+  <input type="text" id="teamName" placeholder="Nome do time" required>
+  <button id="addTeamBtn">Adicionar Time</button>
+  <button id="downloadPDFBtn">Baixar PDF</button>
+
+  <table id="tournamentTable">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Jogos</th>
+        <th>Vitórias</th>
+        <th>Empates</th>
+        <th>Derrotas</th>
+        <th>Pontos</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Linhas de times serão adicionadas aqui -->
+    </tbody>
+  </table>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    let teams = JSON.parse(localStorage.getItem('teams')) || [];
+
+    document.getElementById('addTeamBtn').addEventListener('click', () => {
+      const teamName = document.getElementById('teamName').value.trim();
+      if (teamName) {
+        const team = {
+          name: teamName,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          points: 0
+        };
+        teams.push(team);
+        document.getElementById('teamName').value = '';
+        saveTeams();
+        renderTable();
+      }
+    });
+
+    function renderTable() {
+      const tbody = document.getElementById('tournamentTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
+      teams.sort((a, b) => b.points - a.points);
+      teams.forEach((team, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${team.name}</td>
+          <td>${team.wins + team.draws + team.losses}</td>
+          <td contenteditable="true" onblur="updateRecord(${index}, 'wins', this.innerText)" oninput="validateNumber(this)">${team.wins}</td>
+          <td contenteditable="true" onblur="updateRecord(${index}, 'draws', this.innerText)" oninput="validateNumber(this)">${team.draws}</td>
+          <td contenteditable="true" onblur="updateRecord(${index}, 'losses', this.innerText)" oninput="validateNumber(this)">${team.losses}</td>
+          <td>${team.points}</td>
+          <td>
+            <button onclick="removeTeam(${index})">Remover</button>
+          </td>
+        `;
+      });
+    }
+
+    function updateRecord(index, field, value) {
+      const team = teams[index];
+      const parsedValue = parseInt(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        team[field] = parsedValue;
+        if (field === 'wins') {
+          team.points = team.wins * 3 + team.draws;
+        } else if (field === 'draws') {
+          team.points = team.wins * 3 + team.draws;
+        }
+        saveTeams();
+        renderTable();
+      } else {
+        alert('Por favor, insira um número válido.');
+      }
+    }
+
+    function validateNumber(cell) {
+      cell.innerText = cell.innerText.replace(/[^0-9]/g, '');
+    }
+
+    function removeTeam(index) {
+      teams.splice(index, 1);
+      saveTeams();
+      renderTable();
+    }
+
+    function saveTeams() {
+      localStorage.setItem('teams', JSON.stringify(teams));
+    }
+
+    document.getElementById('downloadPDFBtn').addEventListener('click', () => {
+      const doc = new jsPDF();
+      const table = document.getElementById('tournamentTable');
+      doc.autoTable({ html: table });
+      doc.save('tabela_campeonato.pdf');
+    });
+
+    renderTable();
+  </script>
+
+</body>
+</html>
