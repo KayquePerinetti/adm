@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tabela de Campeonato</title>
   <style>
+    html {
+    display: flex;
+    }
     body {
+      margin: 0px;
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
     }
@@ -17,9 +21,15 @@
       text-align: center;
       border: 1px solid #ddd;
     }
+    h1 {
+    display: inline;
+    }
     th {
       background-color: #4CAF50;
       color: white;
+    }
+    input#teamName {
+    height: 25px;
     }
     button {
       padding: 5px 10px;
@@ -27,11 +37,10 @@
       cursor: pointer;
     }
     #addTeamBtn {
-      margin-bottom: 20px;
     }
-    div{
+    div {
     display: grid;
-    justify-content: center;
+    justify-items: center;
     }
   </style>
 </head>
