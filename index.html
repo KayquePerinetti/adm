@@ -1,160 +1,475 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campeonato</title>
-  <style>
-    html {
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campeonato com 2 Divisões e PDF</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f0f2f5;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+  }
+  /* Abas */
+  .tabs {
+    max-width: 900px;
+    margin: 20px auto 10px auto;
     display: flex;
-    }
-    body {
-      margin: 0px;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-    }
-    table {
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 7px 3px;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
-    button.apagar {
+    justify-content: center;
+    gap: 10px;
+  }
+  .tab-button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
     cursor: pointer;
-    padding: 2px;
-    }
-    h1 {
-    display: inline;
-    }
-    th {
-      background-color: #4CAF50;
-      color: white;
-    }
-    input#teamName {
-    height: 25px;
-    }
-    button {
-      padding: 5px 10px;
-      margin: 5px;
-      cursor: pointer;
-    }
-    #addTeamBtn {
-    }
-    div {
-    display: grid;
-    justify-items: center;
-    }
-  </style>
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+  }
+  .tab-button.active {
+    background: #0056b3;
+  }
+  /* Conteúdo abas */
+  .tab-content {
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    padding: 10px 10px 20px 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  /* Controle geral */
+  #controls {
+    max-width: 900px;
+    margin: 0 auto 10px auto;
+    text-align: center;
+  }
+  #controls input {
+    padding: 6px 10px;
+    font-size: 16px;
+    width: 200px;
+    margin-right: 8px;
+  }
+  #controls button {
+    padding: 6px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-top: 5px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+    user-select: none;
+  }
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+  td.editable:hover {
+    background-color: #e6f0ff;
+    cursor: pointer;
+  }
+  tr.selected {
+    background-color: #d1e7ff !important;
+  }
+  input.edit-input {
+    width: 60px;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-<div>
-  <h1>Campeonato</h1>
-  <input type="text" id="teamName" placeholder="Nome do time" required>
-  <button id="addTeamBtn">Adicionar Time</button>
-  <button id="downloadPDFBtn">Baixar PDF</button>
 
-  <table id="tournamentTable">
+<h1>Campeonato com 1ª e 2ª Divisões</h1>
+
+<div class="tabs">
+  <button class="tab-button active" data-tab="1">1ª Divisão</button>
+  <button class="tab-button" data-tab="2">2ª Divisão</button>
+</div>
+
+<div id="controls">
+  <input type="text" id="teamNameInput" placeholder="Nome do time" />
+  <button onclick="addTeam()">Adicionar Time</button>
+  <button onclick="deleteSelectedTeam()">Excluir Time Selecionado</button>
+  <button onclick="finalizarTemporada()">Finalizar Temporada (Promoção/Rebaixamento)</button>
+  <button onclick="exportarPDF()">Exportar Classificação em PDF</button>
+</div>
+<p style="text-align:center;">
+  <a href="visualizar.html">Visualizar Classificação (somente leitura)</a>
+</p>
+
+
+<div id="tab1" class="tab-content">
+  <table id="table1">
     <thead>
       <tr>
+        <th>Posição</th>
         <th>Nome</th>
+        <th>Pontos</th>
         <th>Jogos</th>
         <th>Vitórias</th>
         <th>Empates</th>
         <th>Derrotas</th>
-        <th>Pontos</th>
-        <th>Ações</th>
+        <th>Gols</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Linhas de times serão adicionadas aqui -->
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const { jsPDF } = window.jspdf;
 
-    let teams = JSON.parse(localStorage.getItem('teams')) || [];
+<div id="tab2" class="tab-content" style="display:none;">
+  <table id="table2">
+    <thead>
+      <tr>
+        <th>Posição</th>
+        <th>Nome</th>
+        <th>Pontos</th>
+        <th>Jogos</th>
+        <th>Vitórias</th>
+        <th>Empates</th>
+        <th>Derrotas</th>
+        <th>Gols</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-    document.getElementById('addTeamBtn').addEventListener('click', () => {
-      const teamName = document.getElementById('teamName').value.trim();
-      if (teamName) {
-        const team = {
-          name: teamName,
-          wins: 0,
-          draws: 0,
-          losses: 0,
-          points: 0
-        };
-        teams.push(team);
-        document.getElementById('teamName').value = '';
-        saveTeams();
-        renderTable();
-      }
-    });
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+  let db;
+  let selectedRowId = null;
+  let selectedDivision = 1; // 1 ou 2
 
-    function renderTable() {
-      const tbody = document.getElementById('tournamentTable').getElementsByTagName('tbody')[0];
-      tbody.innerHTML = '';
-      teams.sort((a, b) => b.points - a.points);
-      teams.forEach((team, index) => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-          <td>${team.name}</td>
-          <td>${team.wins + team.draws + team.losses}</td>
-          <td contenteditable="true" onblur="updateRecord(${index}, 'wins', this.innerText)" oninput="validateNumber(this)">${team.wins}</td>
-          <td contenteditable="true" onblur="updateRecord(${index}, 'draws', this.innerText)" oninput="validateNumber(this)">${team.draws}</td>
-          <td contenteditable="true" onblur="updateRecord(${index}, 'losses', this.innerText)" oninput="validateNumber(this)">${team.losses}</td>
-          <td>${team.points}</td>
-          <td>
-            <button onclick="removeTeam(${index})" class="apagar">Apagar</button>
-          </td>
-        `;
-      });
+  // IndexedDB setup
+  const request = indexedDB.open("CampeonatoDB", 2);
+
+  request.onupgradeneeded = e => {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains('times')) {
+      const store = db.createObjectStore('times', { keyPath: 'id', autoIncrement: true });
+      store.createIndex('nome', 'nome', { unique: true });
+    }
+  };
+
+  request.onsuccess = e => {
+    db = e.target.result;
+    carregarTimes();
+  };
+
+  request.onerror = e => {
+    alert("Erro ao abrir banco: " + e.target.errorCode);
+  };
+
+  // Função para adicionar time na divisão selecionada
+  function addTeam() {
+    const nome = document.getElementById('teamNameInput').value.trim();
+    if (!nome) {
+      alert('Informe o nome do time');
+      return;
     }
 
-    function updateRecord(index, field, value) {
-      const team = teams[index];
-      const parsedValue = parseInt(value);
-      if (!isNaN(parsedValue) && parsedValue >= 0) {
-        team[field] = parsedValue;
-        if (field === 'wins') {
-          team.points = team.wins * 3 + team.draws;
-        } else if (field === 'draws') {
-          team.points = team.wins * 3 + team.draws;
-        }
-        saveTeams();
-        renderTable();
+    const transaction = db.transaction(['times'], 'readwrite');
+    const store = transaction.objectStore('times');
+    const index = store.index('nome');
+    const query = index.get(nome);
+    query.onsuccess = () => {
+      if (query.result) {
+        alert('Time já existe');
       } else {
-        alert('Por favor, insira um número válido.');
+        const novoTime = {
+          nome,
+          vitorias: 0,
+          empates: 0,
+          derrotas: 0,
+          gols: 0,
+          divisao: selectedDivision
+        };
+        const addRequest = store.add(novoTime);
+        addRequest.onsuccess = () => {
+          document.getElementById('teamNameInput').value = '';
+          carregarTimes();
+        };
       }
+    };
+  }
+
+  // Excluir time selecionado
+  function deleteSelectedTeam() {
+    if (selectedRowId === null) {
+      alert('Selecione um time para excluir clicando na linha da tabela.');
+      return;
+    }
+    if (!confirm('Confirma exclusão do time selecionado?')) return;
+
+    const transaction = db.transaction(['times'], 'readwrite');
+    const store = transaction.objectStore('times');
+    const deleteRequest = store.delete(selectedRowId);
+
+    deleteRequest.onsuccess = () => {
+      selectedRowId = null;
+      carregarTimes();
+    };
+  }
+
+  // Calcular pontos e jogos
+  function calculaPontosJogos(time) {
+    const pontos = time.vitorias * 3 + time.empates;
+    const jogos = time.vitorias + time.empates + time.derrotas;
+    return { pontos, jogos };
+  }
+
+  // Carregar times e montar tabela para as duas divisões
+  function carregarTimes() {
+    selectedRowId = null;
+    carregarTabela(1);
+    carregarTabela(2);
+  }
+
+  function carregarTabela(divisao) {
+    const tbody = document.querySelector(`#table${divisao} tbody`);
+    tbody.innerHTML = '';
+
+    const transaction = db.transaction(['times'], 'readonly');
+    const store = transaction.objectStore('times');
+
+    let times = [];
+    store.openCursor().onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if (cursor.value.divisao === divisao) {
+          times.push(cursor.value);
+        }
+        cursor.continue();
+      } else {
+        // Ordenar times na divisão
+        times.sort((a,b) => {
+          const aPts = a.vitorias*3 + a.empates;
+          const bPts = b.vitorias*3 + b.empates;
+          if(bPts !== aPts) return bPts - aPts;
+          return b.gols - a.gols;
+        });
+
+        times.forEach((time, i) => {
+          const { pontos, jogos } = calculaPontosJogos(time);
+          const tr = document.createElement('tr');
+          tr.dataset.id = time.id;
+          tr.dataset.divisao = divisao;
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${time.nome}</td>
+            <td>${pontos}</td>
+            <td>${jogos}</td>
+            <td class="editable" data-field="vitorias" data-id="${time.id}">${time.vitorias}</td>
+            <td class="editable" data-field="empates" data-id="${time.id}">${time.empates}</td>
+            <td class="editable" data-field="derrotas" data-id="${time.id}">${time.derrotas}</td>
+            <td class="editable" data-field="gols" data-id="${time.id}">${time.gols}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        ativarEdicao();
+        ativarSelecaoLinha();
+      }
+    };
+  }
+
+  // Selecionar aba e mudar divisão selecionada
+  const tabs = document.querySelectorAll('.tab-button');
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      selectedDivision = Number(tab.dataset.tab);
+      document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+      document.querySelector(`#tab${selectedDivision}`).style.display = 'block';
+      selectedRowId = null;
+      carregarTabela(selectedDivision);
+    };
+  });
+
+  // Permite selecionar uma linha da tabela (time)
+  function ativarSelecaoLinha() {
+    const linhas = document.querySelectorAll(`#table${selectedDivision} tbody tr`);
+    linhas.forEach(tr => {
+      tr.onclick = () => {
+        document.querySelectorAll(`#table${selectedDivision} tbody tr`).forEach(l => l.classList.remove('selected'));
+        tr.classList.add('selected');
+        selectedRowId = Number(tr.dataset.id);
+      };
+    });
+  }
+
+  // Ativar edição nas colunas editáveis
+  function ativarEdicao() {
+    const celulas = document.querySelectorAll(`#table${selectedDivision} td.editable`);
+    celulas.forEach(td => {
+      td.ondblclick = () => {
+        if (td.querySelector('input')) return;
+
+        const valorAtual = td.textContent;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = 0;
+        input.value = valorAtual;
+        input.classList.add('edit-input');
+
+        td.textContent = '';
+        td.appendChild(input);
+        input.focus();
+
+        input.onkeydown = e => {
+          if (e.key === 'Enter') {
+            salvarEdicao(td, input.value);
+          } else if (e.key === 'Escape') {
+            td.textContent = valorAtual;
+          }
+        };
+
+        input.onblur = () => {
+          salvarEdicao(td, input.value);
+        };
+      };
+    });
+  }
+
+  // Salvar edição no IndexedDB
+  function salvarEdicao(td, novoValor) {
+    novoValor = parseInt(novoValor);
+    if (isNaN(novoValor) || novoValor < 0) {
+      alert('Informe um número válido >= 0');
+      carregarTimes();
+      return;
+    }
+    const id = Number(td.getAttribute('data-id'));
+    const field = td.getAttribute('data-field');
+
+    const transaction = db.transaction(['times'], 'readwrite');
+    const store = transaction.objectStore('times');
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = () => {
+      const time = getRequest.result;
+      if (time) {
+        time[field] = novoValor;
+        const updateRequest = store.put(time);
+        updateRequest.onsuccess = () => {
+          carregarTimes();
+        };
+      }
+    };
+  }
+
+  // Função que finaliza temporada com promoção e rebaixamento
+  function finalizarTemporada() {
+    if (!confirm('Confirma finalizar a temporada? Isso fará promoção e rebaixamento e resetará as estatísticas.')) return;
+
+    const transaction = db.transaction(['times'], 'readwrite');
+    const store = transaction.objectStore('times');
+
+    // Buscar todos os times
+    const times = [];
+    store.openCursor().onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        times.push(cursor.value);
+        cursor.continue();
+      } else {
+        // Dividir por divisões
+        const div1 = times.filter(t => t.divisao === 1);
+        const div2 = times.filter(t => t.divisao === 2);
+
+        // Ordenar por pontos e gols desc
+        function ordenarTimes(arr) {
+          return arr.sort((a,b) => {
+            const aPts = a.vitorias*3 + a.empates;
+            const bPts = b.vitorias*3 + b.empates;
+            if(bPts !== aPts) return bPts - aPts;
+            return b.gols - a.gols;
+          });
+        }
+
+        ordenarTimes(div1);
+        ordenarTimes(div2);
+
+        // 2 últimos da 1ª descem para 2ª
+        const rebaixados = div1.slice(-2);
+        // 2 primeiros da 2ª sobem para 1ª
+        const promovidos = div2.slice(0,2);
+
+        // Atualizar divisões
+        rebaixados.forEach(t => t.divisao = 2);
+        promovidos.forEach(t => t.divisao = 1);
+
+        // Resetar estatísticas para todos
+        times.forEach(t => {
+          t.vitorias = 0;
+          t.empates = 0;
+          t.derrotas = 0;
+          t.gols = 0;
+        });
+
+        // Salvar todas atualizações no banco
+        let count = 0;
+        times.forEach(t => {
+          store.put(t).onsuccess = () => {
+            count++;
+            if (count === times.length) {
+              alert('Temporada finalizada com sucesso! Promoções e rebaixamentos aplicados, estatísticas zeradas.');
+              carregarTimes();
+            }
+          };
+        });
+      }
+    };
+  }
+
+  // Exportar tabela atual em PDF
+  async function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const tabela = document.querySelector(`#table${selectedDivision}`);
+    if (!tabela) {
+      alert('Tabela da divisão selecionada não encontrada.');
+      return;
     }
 
-    function validateNumber(cell) {
-      cell.innerText = cell.innerText.replace(/[^0-9]/g, '');
-    }
+    doc.setFontSize(18);
+    doc.text(`Classificação - ${selectedDivision}ª Divisão`, 14, 20);
 
-    function removeTeam(index) {
-      teams.splice(index, 1);
-      saveTeams();
-      renderTable();
-    }
+    const headers = ["Posição","Nome","Pontos","Jogos","Vitórias","Empates","Derrotas","Gols"];
+    const rows = [];
 
-    function saveTeams() {
-      localStorage.setItem('teams', JSON.stringify(teams));
-    }
-
-    document.getElementById('downloadPDFBtn').addEventListener('click', () => {
-      const doc = new jsPDF();
-      const table = document.getElementById('tournamentTable');
-      doc.autoTable({ html: table });
-      doc.save('tabela_campeonato.pdf');
+    const linhas = tabela.querySelectorAll("tbody tr");
+    linhas.forEach(tr => {
+      const cols = [...tr.querySelectorAll("td")].map(td => td.textContent);
+      rows.push(cols);
     });
 
-    renderTable();
-  </script>
+    doc.autoTable({
+      head: [headers],
+      body: rows,
+      startY: 30,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 123, 255] },
+    });
+
+    doc.save(`Classificacao_${selectedDivision}aDivisao.pdf`);
+  }
+</script>
 
 </body>
 </html>
