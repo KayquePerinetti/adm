@@ -1,120 +1,203 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=0.5" />
-<title>Campeonato com 2 Divisões e PDF</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Administração Campeonato</title>
 <style>
+  :root {
+    --blue: #1565c0;
+    --blue-light: #1976d2;
+    --blue-dark: #0d47a1;
+    --gray-light: #f5f5f5;
+    --gray-medium: #ccc;
+    --gray-dark: #555;
+    --green: #388e3c;
+    --red: #d32f2f;
+  }
   body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f0f2f5;
-    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--gray-light);
+    margin: 0; padding: 1.5rem;
+    color: var(--gray-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   h1 {
-    text-align: center;
+    color: var(--blue-dark);
+    margin-bottom: 1rem;
+    user-select: none;
   }
-  /* Abas */
   .tabs {
-    max-width: 900px;
-    margin: 20px auto 10px auto;
     display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
   }
-  .tab-button {
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
+  .tab-btn {
+    background: var(--gray-medium);
     border: none;
+    border-radius: 6px 6px 0 0;
+    padding: 0.5rem 1.3rem;
+    font-weight: 700;
+    color: var(--blue-dark);
     cursor: pointer;
-    border-radius: 5px 5px 0 0;
-    font-weight: bold;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.12);
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
   }
-  .tab-button.active {
-    background: #0056b3;
+  .tab-btn:hover:not(.active) {
+    background: var(--blue-light);
+    color: white;
   }
-  /* Conteúdo abas */
+  .tab-btn.active {
+    background: var(--blue-dark);
+    color: white;
+    cursor: default;
+    box-shadow: inset 0 -4px 0 0 var(--green);
+  }
   .tab-content {
-    max-width: 900px;
-    margin: 0 auto 30px auto;
     background: white;
-    border: 1px solid #ddd;
-    border-top: none;
-    padding: 10px 10px 20px 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  /* Controle geral */
-  #controls {
-    display: grid;
-    justify-items: center;
+    border-radius: 0 10px 10px 10px;
+    padding: 1rem 1.4rem 1.6rem;
+    width: 100%;
     max-width: 900px;
-    margin: 0 auto 10px auto;
-    text-align: center;
-  }
-  #controls input {
-    padding: 6px 10px;
-    font-size: 16px;
-    width: 200px;
-    margin-right: 8px;
-  }
-  #controls button {
-    padding: 6px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-right: 10px;
-    margin-top: 5px;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.15);
+    min-height: 400px;
   }
   table {
     border-collapse: collapse;
     width: 100%;
+    font-size: 0.95rem;
   }
   th, td {
-    padding: 10px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--gray-medium);
+    padding: 0.5rem 0.7rem;
     text-align: center;
     user-select: none;
   }
   th {
-    background-color: #007bff;
+    background: var(--blue-light);
     color: white;
-  }
-  td.editable:hover {
-    background-color: #e6f0ff;
-    cursor: pointer;
+    font-weight: 700;
   }
   tr.selected {
-    background-color: #d1e7ff !important;
+    background-color: var(--blue-light);
+    color: white;
   }
-  input.edit-input {
-    width: 60px;
+  input[type="text"] {
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid var(--gray-medium);
+    margin-right: 0.5rem;
+  }
+  button {
+    margin-top: 1rem;
+    padding: 0.45rem 1.2rem;
+    cursor: pointer;
+    background-color: var(--blue-light);
+    border: none;
+    color: white;
+    border-radius: 6px;
+    font-weight: 700;
+    box-shadow: 0 3px 6px rgb(0 0 0 / 0.22);
+    transition: background-color 0.25s;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background-color: var(--blue-dark);
+  }
+  button:disabled {
+    background-color: var(--gray-medium);
+    cursor: default;
+  }
+
+  /* Modal para edição */
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  .modal[aria-hidden="false"] {
+    display: flex;
+  }
+  .modal-content {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     text-align: center;
+  }
+  .modal-content h3 {
+    margin-bottom: 1rem;
+  }
+  .modal-content label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .modal-content input {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .modal-buttons button {
+    padding: 0.5rem 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: var(--blue-light);
+    color: white;
+    transition: background-color 0.3s;
+  }
+  .modal-buttons button:hover {
+    background-color: var(--blue-dark);
   }
 </style>
 </head>
 <body>
 
-<h1>Campeonato com 1ª e 2ª Divisões</h1>
+<h1>Administração do Campeonato</h1>
 
-<div class="tabs">
-  <button class="tab-button active" data-tab="1">1ª Divisão</button>
-  <button class="tab-button" data-tab="2">2ª Divisão</button>
+<div class="tabs" role="tablist" aria-label="Divisões">
+  <button class="tab-btn active" data-tab="div1Tab" role="tab" aria-selected="true" aria-controls="div1Tab">1ª Divisão</button>
+  <button class="tab-btn" data-tab="div2Tab" role="tab" aria-selected="false" aria-controls="div2Tab">2ª Divisão</button>
 </div>
 
-<div id="controls">
-  <input type="text" id="teamNameInput" placeholder="Nome do time" />
-  <button onclick="addTeam()">Adicionar Time</button>
-  <button onclick="deleteSelectedTeam()">Excluir Time Selecionado</button>
-  <button onclick="finalizarTemporada()">Finalizar Temporada (Promoção/Rebaixamento)</button>
-  <button onclick="exportarPDF()">Exportar Classificação em PDF</button>
+<div style="margin-top: 1rem;">
+  <button id="btnFinalizarTemporada">Finalizar Temporada</button>
+  <button id="btnExportPDF">Exportar Classificação em PDF</button>
+  <button id="btnShowChampions">Exibir Campeões Anteriores</button>
 </div>
-<p style="text-align:center;">
-  <a href="https://kayqueperinetti.github.io/tabela/">Visualizar Classificação (somente leitura)</a>
-</p>
-
-
-<div id="tab1" class="tab-content">
-  <table id="table1">
+<br>
+<br>
+<br>
+<div id="div1Tab" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="div1Tab">
+  <h2>1ª Divisão</h2>
+  <input type="text" id="addTeamDiv1" placeholder="Nome da equipe" aria-label="Nome da equipe para 1ª divisão" />
+  <button id="btnAddDiv1">Adicionar Equipe</button>
+  <button id="btnRemoveDiv1" disabled>Excluir Equipe Selecionada</button>
+  <table id="tableDiv1" aria-label="Tabela 1ª divisão">
+    <br>
+    <br>
+    <br>
     <thead>
       <tr>
         <th>Posição</th>
@@ -131,8 +214,15 @@
   </table>
 </div>
 
-<div id="tab2" class="tab-content" style="display:none;">
-  <table id="table2">
+<div id="div2Tab" class="tab-content" role="tabpanel" tabindex="0" aria-labelledby="div2Tab" hidden>
+  <h2>2ª Divisão</h2>
+  <input type="text" id="addTeamDiv2" placeholder="Nome da equipe" aria-label="Nome da equipe para 2ª divisão" />
+  <button id="btnAddDiv2">Adicionar Equipe</button>
+  <button id="btnRemoveDiv2" disabled>Excluir Equipe Selecionada</button>
+  <table id="tableDiv2" aria-label="Tabela 2ª divisão">
+    <br>
+    <br>
+    <br>
     <thead>
       <tr>
         <th>Posição</th>
@@ -147,331 +237,386 @@
     </thead>
     <tbody></tbody>
   </table>
+</div>
+
+<!-- Modal Campeões -->
+<div id="modalCampeoes" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalCampeoesTitle" tabindex="-1">
+  <div class="modal-content" role="document">
+    <h3 id="modalCampeoesTitle">Campeões Anteriores</h3>
+    <ul id="listCampeoes" style="max-height: 300px; overflow-y: auto; text-align: left; padding-left: 1rem;"></ul>
+    <button id="btnExportChampionsPDF">Exportar Campeões em PDF</button>
+    <button id="btnCloseModal" style="margin-left: 1rem;">Fechar</button>
+  </div>
+</div>
+
+<!-- Modal Edição -->
+<div id="editModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+  <div class="modal-content" role="document">
+    <h3 id="modalTitle">Editar Valor</h3>
+    <label for="editInput">Novo valor (número ≥ 0):</label>
+    <input type="number" id="editInput" min="0" aria-label="Campo para editar valor" />
+    <div class="modal-buttons">
+      <button id="btnSaveEdit">Salvar</button>
+      <button id="btnCancelEdit">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script>
-  let db;
-  let selectedRowId = null;
-  let selectedDivision = 1; // 1 ou 2
+(() => {
+  let div1 = [];
+  let div2 = [];
+  let championsList = [];
+  let selectedDiv1 = null;
+  let selectedDiv2 = null;
 
-  // IndexedDB setup
-  const request = indexedDB.open("CampeonatoDB", 2);
-
-  request.onupgradeneeded = e => {
-    db = e.target.result;
-    if (!db.objectStoreNames.contains('times')) {
-      const store = db.createObjectStore('times', { keyPath: 'id', autoIncrement: true });
-      store.createIndex('nome', 'nome', { unique: true });
-    }
-  };
-
-  request.onsuccess = e => {
-    db = e.target.result;
-    carregarTimes();
-  };
-
-  request.onerror = e => {
-    alert("Erro ao abrir banco: " + e.target.errorCode);
-  };
-
-  // Função para adicionar time na divisão selecionada
-  function addTeam() {
-    const nome = document.getElementById('teamNameInput').value.trim();
-    if (!nome) {
-      alert('Informe o nome do time');
-      return;
-    }
-
-    const transaction = db.transaction(['times'], 'readwrite');
-    const store = transaction.objectStore('times');
-    const index = store.index('nome');
-    const query = index.get(nome);
-    query.onsuccess = () => {
-      if (query.result) {
-        alert('Time já existe');
-      } else {
-        const novoTime = {
-          nome,
-          vitorias: 0,
-          empates: 0,
-          derrotas: 0,
-          gols: 0,
-          divisao: selectedDivision
-        };
-        const addRequest = store.add(novoTime);
-        addRequest.onsuccess = () => {
-          document.getElementById('teamNameInput').value = '';
-          carregarTimes();
-        };
-      }
-    };
+  // Salvar estado
+  function saveState() {
+    localStorage.setItem('div1', JSON.stringify(div1));
+    localStorage.setItem('div2', JSON.stringify(div2));
+    localStorage.setItem('championsList', JSON.stringify(championsList));
+  }
+  // Carregar estado
+  function loadState() {
+    div1 = JSON.parse(localStorage.getItem('div1')) || [];
+    div2 = JSON.parse(localStorage.getItem('div2')) || [];
+    championsList = JSON.parse(localStorage.getItem('championsList')) || [];
   }
 
-  // Excluir time selecionado
-  function deleteSelectedTeam() {
-    if (selectedRowId === null) {
-      alert('Selecione um time para excluir clicando na linha da tabela.');
-      return;
-    }
-    if (!confirm('Confirma exclusão do time selecionado?')) return;
-
-    const transaction = db.transaction(['times'], 'readwrite');
-    const store = transaction.objectStore('times');
-    const deleteRequest = store.delete(selectedRowId);
-
-    deleteRequest.onsuccess = () => {
-      selectedRowId = null;
-      carregarTimes();
-    };
+  // Ordenar divisão para exibição
+  function sortDivision(div) {
+    div.sort((a,b) => {
+      const ptsA = a.v * 3 + a.e;
+      const ptsB = b.v * 3 + b.e;
+      if(ptsB !== ptsA) return ptsB - ptsA;
+      if(b.v !== a.v) return b.v - a.v;
+      if(b.g !== a.g) return b.g - a.g;
+      return a.nome.localeCompare(b.nome);
+    });
   }
 
-  // Calcular pontos e jogos
-  function calculaPontosJogos(time) {
-    const pontos = time.vitorias * 3 + time.empates;
-    const jogos = time.vitorias + time.empates + time.derrotas;
-    return { pontos, jogos };
-  }
-
-  // Carregar times e montar tabela para as duas divisões
-  function carregarTimes() {
-    selectedRowId = null;
-    carregarTabela(1);
-    carregarTabela(2);
-  }
-
-  function carregarTabela(divisao) {
-    const tbody = document.querySelector(`#table${divisao} tbody`);
+  // Atualizar tabela
+  function updateTable(div, tbody, selectedIndex, divisionId) {
     tbody.innerHTML = '';
-
-    const transaction = db.transaction(['times'], 'readonly');
-    const store = transaction.objectStore('times');
-
-    let times = [];
-    store.openCursor().onsuccess = e => {
-      const cursor = e.target.result;
-      if (cursor) {
-        if (cursor.value.divisao === divisao) {
-          times.push(cursor.value);
-        }
-        cursor.continue();
-      } else {
-        // Ordenar times na divisão
-        times.sort((a,b) => {
-          const aPts = a.vitorias*3 + a.empates;
-          const bPts = b.vitorias*3 + b.empates;
-          if(bPts !== aPts) return bPts - aPts;
-          return b.gols - a.gols;
-        });
-
-        times.forEach((time, i) => {
-          const { pontos, jogos } = calculaPontosJogos(time);
-          const tr = document.createElement('tr');
-          tr.dataset.id = time.id;
-          tr.dataset.divisao = divisao;
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${time.nome}</td>
-            <td>${pontos}</td>
-            <td>${jogos}</td>
-            <td class="editable" data-field="vitorias" data-id="${time.id}">${time.vitorias}</td>
-            <td class="editable" data-field="empates" data-id="${time.id}">${time.empates}</td>
-            <td class="editable" data-field="derrotas" data-id="${time.id}">${time.derrotas}</td>
-            <td class="editable" data-field="gols" data-id="${time.id}">${time.gols}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-        ativarEdicao();
-        ativarSelecaoLinha();
-      }
-    };
-  }
-
-  // Selecionar aba e mudar divisão selecionada
-  const tabs = document.querySelectorAll('.tab-button');
-  tabs.forEach(tab => {
-    tab.onclick = () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      selectedDivision = Number(tab.dataset.tab);
-      document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
-      document.querySelector(`#tab${selectedDivision}`).style.display = 'block';
-      selectedRowId = null;
-      carregarTabela(selectedDivision);
-    };
-  });
-
-  // Permite selecionar uma linha da tabela (time)
-  function ativarSelecaoLinha() {
-    const linhas = document.querySelectorAll(`#table${selectedDivision} tbody tr`);
-    linhas.forEach(tr => {
+    sortDivision(div);
+    div.forEach((team, i) => {
+      const pontos = team.v * 3 + team.e;
+      const jogos = team.v + team.e + team.d;
+      const tr = document.createElement('tr');
+      tr.classList.toggle('selected', selectedIndex === i);
+      tr.tabIndex = 0;
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${team.nome}</td>
+        <td>${pontos}</td>
+        <td>${jogos}</td>
+        <td>${team.v}</td>
+        <td>${team.e}</td>
+        <td>${team.d}</td>
+        <td>${team.g}</td>
+      `;
       tr.onclick = () => {
-        document.querySelectorAll(`#table${selectedDivision} tbody tr`).forEach(l => l.classList.remove('selected'));
-        tr.classList.add('selected');
-        selectedRowId = Number(tr.dataset.id);
+        if (divisionId === 1) {
+          selectedDiv1 = i;
+          document.getElementById('btnRemoveDiv1').disabled = false;
+        } else {
+          selectedDiv2 = i;
+          document.getElementById('btnRemoveDiv2').disabled = false;
+        }
+        updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+        updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
       };
+      tbody.appendChild(tr);
     });
+    attachDoubleClickForEdit(tbody, div, divisionId);
   }
 
-  // Ativar edição nas colunas editáveis
-  function ativarEdicao() {
-    const celulas = document.querySelectorAll(`#table${selectedDivision} td.editable`);
-    celulas.forEach(td => {
-      td.ondblclick = () => {
-        if (td.querySelector('input')) return;
-
-        const valorAtual = td.textContent;
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = 0;
-        input.value = valorAtual;
-        input.classList.add('edit-input');
-
-        td.textContent = '';
-        td.appendChild(input);
-        input.focus();
-
-        input.onkeydown = e => {
-          if (e.key === 'Enter') {
-            salvarEdicao(td, input.value);
-          } else if (e.key === 'Escape') {
-            td.textContent = valorAtual;
-          }
-        };
-
-        input.onblur = () => {
-          salvarEdicao(td, input.value);
-        };
-      };
-    });
-  }
-
-  // Salvar edição no IndexedDB
-  function salvarEdicao(td, novoValor) {
-    novoValor = parseInt(novoValor);
-    if (isNaN(novoValor) || novoValor < 0) {
-      alert('Informe um número válido >= 0');
-      carregarTimes();
+  // Adicionar equipe
+  function addTeam(div, input, tbody, divisionId) {
+    const name = input.value.trim();
+    if (!name) {
+      alert('Digite o nome da equipe antes de adicionar.');
+      input.focus();
       return;
     }
-    const id = Number(td.getAttribute('data-id'));
-    const field = td.getAttribute('data-field');
-
-    const transaction = db.transaction(['times'], 'readwrite');
-    const store = transaction.objectStore('times');
-    const getRequest = store.get(id);
-
-    getRequest.onsuccess = () => {
-      const time = getRequest.result;
-      if (time) {
-        time[field] = novoValor;
-        const updateRequest = store.put(time);
-        updateRequest.onsuccess = () => {
-          carregarTimes();
-        };
-      }
-    };
+    if (div.some(t => t.nome.toLowerCase() === name.toLowerCase())) {
+      alert('Equipe já existe nesta divisão.');
+      input.focus();
+      return;
+    }
+    const newTeam = { nome: name, v: 0, e: 0, d: 0, g: 0 };
+    div.push(newTeam);
+    input.value = '';
+    saveState();
+    updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+    updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
   }
 
-  // Função que finaliza temporada com promoção e rebaixamento
+  // Remover equipe selecionada
+  function removeSelected(div, tbody, divisionId) {
+    if (divisionId === 1 && selectedDiv1 !== null) {
+      if (!confirm(`Tem certeza que deseja excluir a equipe "${div[selectedDiv1].nome}" da 1ª Divisão?`)) return;
+      div.splice(selectedDiv1, 1);
+      selectedDiv1 = null;
+      document.getElementById('btnRemoveDiv1').disabled = true;
+    }
+    if (divisionId === 2 && selectedDiv2 !== null) {
+      if (!confirm(`Tem certeza que deseja excluir a equipe "${div[selectedDiv2].nome}" da 2ª Divisão?`)) return;
+      div.splice(selectedDiv2, 1);
+      selectedDiv2 = null;
+      document.getElementById('btnRemoveDiv2').disabled = true;
+    }
+    saveState();
+    updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+    updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
+  }
+
+  // Finalizar temporada (promoção/rebaixamento)
   function finalizarTemporada() {
-    if (!confirm('Confirma finalizar a temporada? Isso fará promoção e rebaixamento e resetará as estatísticas.')) return;
+    if (div1.length < 4 || div2.length < 4) {
+      alert('Para finalizar a temporada, cada divisão deve ter pelo menos 4 equipes.');
+      return;
+    }
+    sortDivision(div1);
+    sortDivision(div2);
 
-    const transaction = db.transaction(['times'], 'readwrite');
-    const store = transaction.objectStore('times');
+    const campeaoDiv1 = div1[0].nome;
+    const campeaoDiv2 = div2[0].nome;
 
-    // Buscar todos os times
-    const times = [];
-    store.openCursor().onsuccess = e => {
-      const cursor = e.target.result;
-      if (cursor) {
-        times.push(cursor.value);
-        cursor.continue();
-      } else {
-        // Dividir por divisões
-        const div1 = times.filter(t => t.divisao === 1);
-        const div2 = times.filter(t => t.divisao === 2);
+    const promovidos = div2.splice(0, 2);
+    const rebaixados = div1.splice(div1.length - 2, 2);
 
-        // Ordenar por pontos e gols desc
-        function ordenarTimes(arr) {
-          return arr.sort((a,b) => {
-            const aPts = a.vitorias*3 + a.empates;
-            const bPts = b.vitorias*3 + b.empates;
-            if(bPts !== aPts) return bPts - aPts;
-            return b.gols - a.gols;
-          });
-        }
+    div1 = div1.concat(promovidos);
+    div2 = rebaixados.concat(div2);
 
-        ordenarTimes(div1);
-        ordenarTimes(div2);
+    alert(`Temporada finalizada!\n\nCampeões:\n1ª Divisão: ${campeaoDiv1}\n2ª Divisão: ${campeaoDiv2}\n\nPromoção e Rebaixamento aplicados.`);
 
-        // 2 últimos da 1ª descem para 2ª
-        const rebaixados = div1.slice(-2);
-        // 2 primeiros da 2ª sobem para 1ª
-        const promovidos = div2.slice(0,2);
+    championsList.push({
+      date: new Date().toLocaleDateString(),
+      campeaoDiv1,
+      campeaoDiv2
+    });
 
-        // Atualizar divisões
-        rebaixados.forEach(t => t.divisao = 2);
-        promovidos.forEach(t => t.divisao = 1);
+    saveState();
+    updateLatestChampionUI();
 
-        // Resetar estatísticas para todos
-        times.forEach(t => {
-          t.vitorias = 0;
-          t.empates = 0;
-          t.derrotas = 0;
-          t.gols = 0;
-        });
+    selectedDiv1 = null;
+    selectedDiv2 = null;
+    document.getElementById('btnRemoveDiv1').disabled = true;
+    document.getElementById('btnRemoveDiv2').disabled = true;
 
-        // Salvar todas atualizações no banco
-        let count = 0;
-        times.forEach(t => {
-          store.put(t).onsuccess = () => {
-            count++;
-            if (count === times.length) {
-              alert('Temporada finalizada com sucesso! Promoções e rebaixamentos aplicados, estatísticas zeradas.');
-              carregarTimes();
-            }
-          };
-        });
-      }
-    };
+    updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+    updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
   }
 
-  // Exportar tabela atual em PDF
-  async function exportarPDF() {
+  // Atualizar UI campeões recentes
+  function updateLatestChampionUI() {
+    // Pode adicionar algo aqui se quiser exibir campeões em algum lugar fixo
+  }
+
+  // Exportar classificação em PDF
+  async function exportClassificationPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    if (!doc.autoTable) {
+      await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');
+    }
+    doc.setFontSize(18);
+    doc.text('Classificação Campeonato', 14, 15);
+
+    let y = 25;
+    function addDivisionTable(div, title) {
+      sortDivision(div);
+      doc.setFontSize(16);
+      doc.text(title, 14, y);
+      y += 8;
+      const rows = div.map((team, i) => {
+        const pontos = team.v * 3 + team.e;
+        const jogos = team.v + team.e + team.d;
+        return [i + 1, team.nome, pontos, jogos, team.v, team.e, team.d, team.g];
+      });
+      doc.autoTable({
+        startY: y,
+        head: [['Posição', 'Nome', 'Pontos', 'Jogos', 'Vitórias', 'Empates', 'Derrotas', 'Gols']],
+        body: rows,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [21, 101, 192] },
+        margin: { left: 14, right: 14 }
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    }
+    addDivisionTable(div1, '1ª Divisão');
+    addDivisionTable(div2, '2ª Divisão');
+
+    doc.save('classificacao_campeonato.pdf');
+  }
+
+  // Mostrar modal campeões
+  function showChampionsModal() {
+    renderChampionsList();
+    modalCampeoes.setAttribute('aria-hidden', 'false');
+    modalCampeoes.style.display = 'flex';
+    modalCampeoes.focus();
+  }
+  // Fechar modal campeões
+  function closeChampionsModal() {
+    modalCampeoes.setAttribute('aria-hidden', 'true');
+    modalCampeoes.style.display = 'none';
+  }
+  // Renderizar lista campeões
+  function renderChampionsList() {
+    const ul = document.getElementById('listCampeoes');
+    ul.innerHTML = '';
+    if (championsList.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'Nenhuma temporada finalizada ainda.';
+      ul.appendChild(li);
+      return;
+    }
+    championsList.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `[${item.date}] 1ª Divisão: ${item.campeaoDiv1} | 2ª Divisão: ${item.campeaoDiv2}`;
+      ul.appendChild(li);
+    });
+  }
+  // Exportar campeões em PDF
+  function exportChampionsPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const tabela = document.querySelector(`#table${selectedDivision}`);
-    if (!tabela) {
-      alert('Tabela da divisão selecionada não encontrada.');
+    doc.setFontSize(16);
+    doc.text('Campeões Anteriores', 14, 20);
+
+    if (championsList.length === 0) {
+      doc.setFontSize(12);
+      doc.text('Nenhuma temporada finalizada ainda.', 14, 30);
+    } else {
+      doc.setFontSize(12);
+      let y = 30;
+      championsList.forEach((item) => {
+        const line = `[${item.date}] 1ª Divisão: ${item.campeaoDiv1} | 2ª Divisão: ${item.campeaoDiv2}`;
+        doc.text(line, 14, y);
+        y += 10;
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+    }
+    doc.save('campeoes_anteriores.pdf');
+  }
+
+  // Modal edição
+  let currentEdit = { divisionId: null, teamIndex: null, field: null, cellElement: null };
+  const modal = document.getElementById('editModal');
+  const inputEdit = document.getElementById('editInput');
+  const btnSaveEdit = document.getElementById('btnSaveEdit');
+  const btnCancelEdit = document.getElementById('btnCancelEdit');
+
+  function openEditModal(divisionId, teamIndex, field, cellElement) {
+    currentEdit = { divisionId, teamIndex, field, cellElement };
+    const div = divisionId === 1 ? div1 : div2;
+    inputEdit.value = div[teamIndex][field];
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    inputEdit.focus();
+    inputEdit.select();
+  }
+  function closeEditModal() {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    currentEdit = { divisionId: null, teamIndex: null, field: null, cellElement: null };
+  }
+  btnSaveEdit.addEventListener('click', () => {
+    const val = inputEdit.value.trim();
+    if (!/^\d+$/.test(val)) {
+      alert('Por favor, insira um número inteiro válido (≥ 0).');
+      inputEdit.focus();
       return;
     }
+    const numVal = Number(val);
+    const { divisionId, teamIndex, field, cellElement } = currentEdit;
+    const div = divisionId === 1 ? div1 : div2;
+    div[teamIndex][field] = numVal;
+    saveState();
+    updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+    updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
+    closeEditModal();
+  });
+  btnCancelEdit.addEventListener('click', closeEditModal);
 
-    doc.setFontSize(18);
-    doc.text(`Classificação - ${selectedDivision}ª Divisão`, 14, 20);
-
-    const headers = ["Posição","Nome","Pontos","Jogos","Vitórias","Empates","Derrotas","Gols"];
-    const rows = [];
-
-    const linhas = tabela.querySelectorAll("tbody tr");
-    linhas.forEach(tr => {
-      const cols = [...tr.querySelectorAll("td")].map(td => td.textContent);
-      rows.push(cols);
+  // Duplo clique para abrir modal nas células
+  function attachDoubleClickForEdit(tbody, div, divisionId) {
+    tbody.querySelectorAll('tr').forEach((tr, idx) => {
+      ['v', 'e', 'd', 'g'].forEach(field => {
+        const colIndex = { v:4, e:5, d:6, g:7 }[field];
+        const cell = tr.cells[colIndex];
+        if (!cell) return;
+        cell.style.cursor = 'pointer';
+        cell.ondblclick = () => openEditModal(divisionId, idx, field, cell);
+      });
     });
-
-    doc.autoTable({
-      head: [headers],
-      body: rows,
-      startY: 30,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [0, 123, 255] },
-    });
-
-    doc.save(`Classificacao_${selectedDivision}aDivisao.pdf`);
   }
-</script>
 
+  // Setup abas
+  function setupTabs() {
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        if(button.classList.contains('active')) return;
+        buttons.forEach(b => {
+          b.classList.remove('active');
+          document.getElementById(b.dataset.tab).hidden = true;
+          document.getElementById(b.dataset.tab).setAttribute('aria-hidden', 'true');
+          b.setAttribute('aria-selected', 'false');
+        });
+        button.classList.add('active');
+        const tabId = button.dataset.tab;
+        const tabContent = document.getElementById(tabId);
+        tabContent.hidden = false;
+        tabContent.setAttribute('aria-hidden', 'false');
+        button.setAttribute('aria-selected', 'true');
+        tabContent.focus();
+      });
+    });
+  }
+
+  // Elementos modal campeões
+  const modalCampeoes = document.getElementById('modalCampeoes');
+  const btnExportChampionsPDF = document.getElementById('btnExportChampionsPDF');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+
+  btnCloseModal.addEventListener('click', closeChampionsModal);
+  btnExportChampionsPDF.addEventListener('click', exportChampionsPDF);
+
+  // Botões
+  document.getElementById('btnAddDiv1').onclick = () => addTeam(div1, document.getElementById('addTeamDiv1'), document.querySelector('#tableDiv1 tbody'), 1);
+  document.getElementById('btnAddDiv2').onclick = () => addTeam(div2, document.getElementById('addTeamDiv2'), document.querySelector('#tableDiv2 tbody'), 2);
+  document.getElementById('btnRemoveDiv1').onclick = () => removeSelected(div1, document.querySelector('#tableDiv1 tbody'), 1);
+  document.getElementById('btnRemoveDiv2').onclick = () => removeSelected(div2, document.querySelector('#tableDiv2 tbody'), 2);
+  document.getElementById('btnFinalizarTemporada').onclick = finalizarTemporada;
+  document.getElementById('btnExportPDF').onclick = exportClassificationPDF;
+  document.getElementById('btnShowChampions').onclick = showChampionsModal;
+
+  // Inicialização
+  function init() {
+    loadState();
+    updateTable(div1, document.querySelector('#tableDiv1 tbody'), selectedDiv1, 1);
+    updateTable(div2, document.querySelector('#tableDiv2 tbody'), selectedDiv2, 2);
+    setupTabs();
+  }
+  window.addEventListener('load', init);
+
+  // Fechar modais com ESC
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if(modal.style.display === 'flex') closeEditModal();
+      if(modalCampeoes.style.display === 'flex') closeChampionsModal();
+    }
+  });
+
+})();
+</script>
 </body>
 </html>
