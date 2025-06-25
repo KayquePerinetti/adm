@@ -546,19 +546,38 @@
   });
   btnCancelEdit.addEventListener('click', closeEditModal);
 
-  // Duplo clique para abrir modal nas células
-  function attachDoubleClickForEdit(tbody, div, divisionId) {
-    tbody.querySelectorAll('tr').forEach((tr, idx) => {
-      ['v', 'e', 'd', 'g'].forEach(field => {
-        const colIndex = { v:4, e:5, d:6, g:7 }[field];
-        const cell = tr.cells[colIndex];
-        if (!cell) return;
-        cell.style.cursor = 'pointer';
-        cell.ondblclick = () => openEditModal(divisionId, idx, field, cell);
+ // Duplo clique para abrir modal nas células
+ // function attachDoubleClickForEdit(tbody, div, divisionId) {
+   // tbody.querySelectorAll('tr').forEach((tr, idx) => {
+    //  ['v', 'e', 'd', 'g'].forEach(field => {
+     //   const colIndex = { v:4, e:5, d:6, g:7 }[field];
+     //   const cell = tr.cells[colIndex];
+     //   if (!cell) return;
+    //    cell.style.cursor = 'pointer';
+     //   cell.ondblclick = () => openEditModal(divisionId, idx, field, cell);
+   //   });
+  //  });
+//  }
+
+// Clique simples para abrir modal nas células (melhor para celular)
+function attachDoubleClickForEdit(tbody, div, divisionId) {
+  tbody.querySelectorAll('tr').forEach((tr, idx) => {
+    ['v', 'e', 'd', 'g'].forEach(field => {
+      const colIndex = { v:4, e:5, d:6, g:7 }[field];
+      const cell = tr.cells[colIndex];
+      if (!cell) return;
+      cell.style.cursor = 'pointer';
+
+      // Para evitar conflitos com a seleção da linha ao clicar
+      cell.addEventListener('click', (event) => {
+        event.stopPropagation(); // Evita acionar seleção da linha
+        openEditModal(divisionId, idx, field, cell);
       });
     });
-  }
+  });
+}
 
+  
   // Setup abas
   function setupTabs() {
     const buttons = document.querySelectorAll('.tab-btn');
