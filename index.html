@@ -18,6 +18,44 @@
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--gray-light);
+    margin: 0;
+    padding: 1.5rem;
+    color: var(--gray-dark);
+    min-height: 100vh;
+  }
+  h1 {
+    color: var(--blue-dark);
+    margin-bottom: 1rem;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="loginContainer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+  <h2 style="color: #1565c0;">Login - Administração</h2>
+  <input type="password" id="senha" placeholder="Digite a senha" style="padding: 0.5rem; font-size: 1rem; width: 220px; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 5px;" />
+  <button onclick="verificarSenha()" style="padding: 0.5rem 1rem; font-weight: bold; color: white; background-color: #1565c0; border: none; border-radius: 5px; cursor: pointer;">Entrar</button>
+  <div id="mensagemErro" style="color: red; margin-top: 0.5rem;"></div>
+</div>
+
+<div id="conteudoPrincipal" style="display: none;">
+  
+  <p>
+    <style>
+  :root {
+    --blue: #1565c0;
+    --blue-light: #1976d2;
+    --blue-dark: #0d47a1;
+    --gray-light: #f5f5f5;
+    --gray-medium: #ccc;
+    --gray-dark: #555;
+    --green: #388e3c;
+    --red: #d32f2f;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--gray-light);
     margin: 0; padding: 1.5rem;
     color: var(--gray-dark);
     min-height: 100vh;
@@ -25,11 +63,13 @@
     flex-direction: column;
     align-items: center;
   }
-  h1 {
+    h1 {
+    display: grid;
     color: var(--blue-dark);
     margin-bottom: 1rem;
     user-select: none;
-  }
+    justify-items: center;
+    }
   .tabs {
     display: flex;
     gap: 0.5rem;
@@ -546,67 +586,19 @@
   });
   btnCancelEdit.addEventListener('click', closeEditModal);
 
- // Duplo clique para abrir modal nas células
- // function attachDoubleClickForEdit(tbody, div, divisionId) {
-   // tbody.querySelectorAll('tr').forEach((tr, idx) => {
-    //  ['v', 'e', 'd', 'g'].forEach(field => {
-     //   const colIndex = { v:4, e:5, d:6, g:7 }[field];
-     //   const cell = tr.cells[colIndex];
-     //   if (!cell) return;
-    //    cell.style.cursor = 'pointer';
-     //   cell.ondblclick = () => openEditModal(divisionId, idx, field, cell);
-   //   });
-  //  });
-//  }
-
-// Clique simples para abrir modal nas células (melhor para celular)
-//function attachDoubleClickForEdit(tbody, div, divisionId) {
-//  tbody.querySelectorAll('tr').forEach((tr, idx) => {
-//    ['v', 'e', 'd', 'g'].forEach(field => {
- //     const colIndex = { v:4, e:5, d:6, g:7 }[field];
-  //    const cell = tr.cells[colIndex];
-  //    if (!cell) return;
-    //  cell.style.cursor = 'pointer';
-
-      // Para evitar conflitos com a seleção da linha ao clicar
-    //  cell.addEventListener('click', (event) => {
-   //     event.stopPropagation(); // Evita acionar seleção da linha
-   //     openEditModal(divisionId, idx, field, cell);
-  //    });
- //   });
-//  });
-// }
-
-function attachDoubleClickForEdit(tbody, div, divisionId) {
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-  tbody.querySelectorAll('tr').forEach((tr, idx) => {
-    ['v', 'e', 'd', 'g'].forEach(field => {
-      const colIndex = { v: 4, e: 5, d: 6, g: 7 }[field];
-      const cell = tr.cells[colIndex];
-      if (!cell) return;
-
-      cell.style.cursor = 'pointer';
-
-      // Remove event listeners anteriores
-      cell.replaceWith(cell.cloneNode(true)); // simples limpeza
-      const newCell = tr.cells[colIndex];
-
-      const triggerEdit = (event) => {
-        event.stopPropagation();
-        openEditModal(divisionId, idx, field, newCell);
-      };
-
-      if (isTouchDevice) {
-        newCell.addEventListener('click', triggerEdit); // toque único em celular/tablet
-      } else {
-        newCell.addEventListener('dblclick', triggerEdit); // duplo clique em PC
-      }
+  // Duplo clique para abrir modal nas células
+  function attachDoubleClickForEdit(tbody, div, divisionId) {
+    tbody.querySelectorAll('tr').forEach((tr, idx) => {
+      ['v', 'e', 'd', 'g'].forEach(field => {
+        const colIndex = { v:4, e:5, d:6, g:7 }[field];
+        const cell = tr.cells[colIndex];
+        if (!cell) return;
+        cell.style.cursor = 'pointer';
+        cell.ondblclick = () => openEditModal(divisionId, idx, field, cell);
+      });
     });
-  });
-}
-  
-  
+  }
+
   // Setup abas
   function setupTabs() {
     const buttons = document.querySelectorAll('.tab-btn');
@@ -665,6 +657,40 @@ function attachDoubleClickForEdit(tbody, div, divisionId) {
   });
 
 })();
+</script></p>
+  <button onclick="sair()">Sair</button>
+</div>
+
+<script>
+function verificarSenha() {
+  const senha = document.getElementById('senha').value;
+  if (senha === '074708') {
+    localStorage.setItem('autenticado', 'true');
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('conteudoPrincipal').style.display = 'block';
+    init(); // Inicia o sistema
+  } else {
+    document.getElementById('mensagemErro').textContent = 'Senha incorreta. Tente novamente.';
+  }
+}
+
+function sair() {
+  localStorage.removeItem('autenticado');
+  location.reload();
+}
+
+window.addEventListener('load', () => {
+  const autenticado = localStorage.getItem('autenticado') === 'true';
+  document.getElementById('loginContainer').style.display = autenticado ? 'none' : 'flex';
+  document.getElementById('conteudoPrincipal').style.display = autenticado ? 'block' : 'none';
+  if (autenticado) init();
+});
+
+function init() {
+  // Toda sua lógica de inicialização do sistema vai aqui
+  console.log("Sistema iniciado");
+}
 </script>
+
 </body>
 </html>
