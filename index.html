@@ -560,23 +560,52 @@
 //  }
 
 // Clique simples para abrir modal nas células (melhor para celular)
-function attachDoubleClickForEdit(tbody, div, divisionId) {
-  tbody.querySelectorAll('tr').forEach((tr, idx) => {
-    ['v', 'e', 'd', 'g'].forEach(field => {
-      const colIndex = { v:4, e:5, d:6, g:7 }[field];
-      const cell = tr.cells[colIndex];
-      if (!cell) return;
-      cell.style.cursor = 'pointer';
+//function attachDoubleClickForEdit(tbody, div, divisionId) {
+//  tbody.querySelectorAll('tr').forEach((tr, idx) => {
+//    ['v', 'e', 'd', 'g'].forEach(field => {
+ //     const colIndex = { v:4, e:5, d:6, g:7 }[field];
+  //    const cell = tr.cells[colIndex];
+  //    if (!cell) return;
+    //  cell.style.cursor = 'pointer';
 
       // Para evitar conflitos com a seleção da linha ao clicar
-      cell.addEventListener('click', (event) => {
-        event.stopPropagation(); // Evita acionar seleção da linha
-        openEditModal(divisionId, idx, field, cell);
-      });
+    //  cell.addEventListener('click', (event) => {
+   //     event.stopPropagation(); // Evita acionar seleção da linha
+   //     openEditModal(divisionId, idx, field, cell);
+  //    });
+ //   });
+//  });
+// }
+
+function attachDoubleClickForEdit(tbody, div, divisionId) {
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  tbody.querySelectorAll('tr').forEach((tr, idx) => {
+    ['v', 'e', 'd', 'g'].forEach(field => {
+      const colIndex = { v: 4, e: 5, d: 6, g: 7 }[field];
+      const cell = tr.cells[colIndex];
+      if (!cell) return;
+
+      cell.style.cursor = 'pointer';
+
+      // Remove event listeners anteriores
+      cell.replaceWith(cell.cloneNode(true)); // simples limpeza
+      const newCell = tr.cells[colIndex];
+
+      const triggerEdit = (event) => {
+        event.stopPropagation();
+        openEditModal(divisionId, idx, field, newCell);
+      };
+
+      if (isTouchDevice) {
+        newCell.addEventListener('click', triggerEdit); // toque único em celular/tablet
+      } else {
+        newCell.addEventListener('dblclick', triggerEdit); // duplo clique em PC
+      }
     });
   });
 }
-
+  
   
   // Setup abas
   function setupTabs() {
